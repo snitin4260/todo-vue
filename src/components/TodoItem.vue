@@ -3,8 +3,8 @@
   <div @click="toggleCheckBox" class="list__checkbox">
     <div v-show="todo.completed" class="list__tick">&#10003;</div>
   </div>
-  <p class="list__task" :class="{ taskDone: todo.completed}"">{{todo.text}}</p>
-  <div class="list__deleteButton">&#9747;</div>
+  <p class="list__task" :class="{ taskDone: todo.completed}">{{todo.text}}</p>
+  <div @click="deleteTask" class="list__deleteButton">&#9747;</div>
 </li>
 
 </template>
@@ -28,6 +28,9 @@ export default {
       else {newCheckBoxValue = true}
       eventBus.$emit('checkbox-event',{value:newCheckBoxValue,id:this.todo.id})
 
+    },
+    deleteTask() {
+      eventBus.$emit('delete-task', this.todo.id)
     }
   }
 }

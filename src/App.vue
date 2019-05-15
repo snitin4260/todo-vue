@@ -40,13 +40,21 @@ export default {
     }
   },
   mounted() {
-    eventBus.$on('checkbox-event',(todoObj)=> {
+    eventBus.$on('checkbox-event',todoObj=> {
       let newTodo=this.todos.map((todo)=> {
         if(todo.id===todoObj.id) {
           todo.completed= todoObj.value
         }
         return todo
         
+      })
+      this.updateTodos(newTodo)
+    })
+
+    eventBus.$on('delete-task',id=> {
+      let newTodo=this.todos.filter((todo)=> {
+        if(todo.id === id) return false;
+        return true
       })
       this.updateTodos(newTodo)
     })
