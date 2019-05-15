@@ -1,53 +1,126 @@
 <template>
-<li class="list" :id="todo.id" >
-  <div @click="toggleCheckBox" class="list__checkbox">
-    <div v-show="todo.completed" class="list__tick">&#10003;</div>
-  </div>
-  <p class="list__task" :class="{ taskDone: todo.completed}">{{todo.text}}</p>
-  <div @click="deleteTask" class="list__deleteButton">&#9747;</div>
-</li>
-
+  <li :id="todo.id">
+    <div @dblclick="showEditInput" v-show="!isEditing" class="list">
+      <div @click="toggleCheckBox" class="list__checkbox">
+        <div v-show="todo.completed" class="list__tick">&#10003;</div>
+      </div>
+      <p class="list__task" :class="{ taskDone: todo.completed}">{{todo.text}}</p>
+      <div class="note" @click="openNoteModal">+</div>
+      <div @click="deleteTask" class="list__deleteButton">&#9747;</div>
+    </div>
+    <div v-show="isEditing" class="list">
+      <input @keyup.enter="saveText" class="list__edit" v-model="editVal" type="text">
+    </div>
+    <div v-show="openModal" class="overlay">
+      <div class="modal">
+        <div class="closeButton-container">
+          <div  class="empty-box"></div>
+          <div @click="closeModal" class="modal__closebutton">&#9747;</div>
+        </div>
+        <div v-show="!anyNoteContent || noteEditButtonClicked">
+          <textarea class="modal__textarea" v-model="textAreaVal"></textarea>
+          <button @click="saveNote" class="modal__button">SAVE</button>
+        </div>
+        <div v-show="anyNoteContent && !noteEditButtonClicked">
+          <p class="modal__text">{{todo.note}}</p>
+          <button @click="noteEdit" class="modal__button">EDIT</button>
+        </div>
+      </div>
+    </div>
+  </li>
 </template>
 
 <script>
-import Vue from'vue'
-import eventBus from "../eventBus.js"
+import Vue from "vue";
+import eventBus from "../eventBus.js";
 
 export default {
-  name: 'TodoItem',
+  name: "TodoItem",
   props: {
     todo: {
-      type:Object,
-      required:true
+      type: Object,
+      required: true
     }
   },
-  methods:{
+  data() {
+    return {
+      isEditing: false,
+      editVal: "",
+      openModal: false,
+      textAreaVal: "",
+      noteEditButtonClicked: false
+    };
+  },
+  methods: {
     toggleCheckBox() {
       let newCheckBoxValue;
-      if(this.todo.completed) newCheckBoxValue = false
-      else {newCheckBoxValue = true}
-      eventBus.$emit('checkbox-event',{value:newCheckBoxValue,id:this.todo.id})
-
+      if (this.todo.completed) newCheckBoxValue = false;
+      else {
+        newCheckBoxValue = true;
+      }
+      eventBus.$emit("checkbox-event", {
+        value: newCheckBoxValue,
+        id: this.todo.id
+      });
     },
     deleteTask() {
-      eventBus.$emit('delete-task', this.todo.id)
+      eventBus.$emit("delete-task", this.todo.id);
+    },
+    showEditInput() {
+      this.isEditing = true;
+      this.editVal = "";
+      this.editVal = this.todo.text;
+    },
+    saveText() {
+      if (this.editVal.trim() === "") this.isEditing = false;
+      else {
+        eventBus.$emit("edit-text", { value: this.editVal, id: this.todo.id });
+        this.isEditing = false;
+      }
+    },
+    openNoteModal() {
+      this.openModal = true;
+    },
+    saveNote() {
+      if (this.textAreaVal.trim() === "") return;
+      if (this.noteEditButtonClicked) this.noteEditButtonClicked = false;
+      eventBus.$emit("edit-note", {
+        value: this.textAreaVal,
+        id: this.todo.id
+      });
+    },
+    noteEdit() {
+      this.noteEditButtonClicked = true;
+      this.textAreaVal = this.todo.note;
+    },
+
+    closeModal() {
+      this.openModal = false;
+    }
+  },
+  computed: {
+    anyNoteContent() {
+      return this.todo.note.length > 0;
     }
   }
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-@import url('https://fonts.googleapis.com/css?family=Roboto:300');
-.list {
+@import url("https://fonts.googleapis.com/css?family=Roboto:300");
+li {
   list-style-type: none;
-  display: flex;
   font-size: 2.4rem;
-  justify-content: space-between;
-  align-items: center;
   border: 0.4rem solid teal;
   padding: 1rem;
   margin-bottom: 1rem;
+}
+
+.list {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .list__tick {
@@ -60,7 +133,6 @@ export default {
   user-select: none;
   -webkit-touch-callout: none;
 }
-
 
 .list__task {
   font-family: "Roboto", sans-serif;
@@ -109,5 +181,103 @@ export default {
   text-decoration: line-through;
 }
 
+.note {
+  margin-right: 4rem;
+  cursor: pointer;
+  width: 4rem;
+  height: 4rem;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.9rem;
+  border-radius: 100%;
+  border: 0.2rem solid green;
+  user-select: none;
+  -webkit-touch-callout: none;
+  color: green;
+}
 
+@media screen and (max-width: 600px) {
+  .note {
+    margin-left: 0.5rem;
+  }
+}
+.modal {
+  position: fixed;
+  width: 400px;
+  min-height: 300px;
+  max-height: 90vh;
+  background-color: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  overflow: auto;
+  border-radius: 4px;
+  border: 3px solid rgb(0, 128, 128);
+}
+
+.modal__textarea {
+  width: 85%;
+  max-width: 500px;
+  height: 200px;
+  font-size: 2.4rem;
+  font-family: "Roboto", sans-serif;
+  margin: 1rem auto;
+  display: block;
+  resize: none;
+  padding: 1rem;
+  /* white-space: pre-wrap; */
+}
+
+.modal__text {
+  width: 90%;
+  word-break: break-all;
+  font-size: 2.4rem;
+  font-family: "Roboto", sans-serif;
+  color: black;
+  margin: 1rem auto;
+  white-space: pre-wrap;
+}
+
+.modal__button {
+  font-family: "Lato", sans-serif;
+  display: block;
+  font-size: 2rem;
+  cursor: pointer;
+  border-radius: 10rem;
+  padding: 1rem 1.5rem;
+  background-color: green;
+  color: white;
+  border: none;
+  margin: 0 auto;
+  margin-bottom: 1rem;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.closeButton-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.empty-box {
+  margin-left: auto;
+}
+
+.modal__closebutton {
+  color: red;
+  margin-right: 1rem;
+  font-size: 3rem;
+  cursor: pointer;
+}
 </style>
