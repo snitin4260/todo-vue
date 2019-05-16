@@ -220,7 +220,8 @@ li {
 }
 .modal {
   position: fixed;
-  width: 400px;
+  width: 80%;
+  max-width: 400px;
   min-height: 300px;
   max-height: 90vh;
   background-color: #fff;
@@ -235,7 +236,7 @@ li {
 
 .modal__textarea {
   width: 85%;
-  max-width: 500px;
+  max-width: 350px;
   height: 200px;
   font-size: 2.4rem;
   font-family: "Roboto", sans-serif;
