@@ -1,12 +1,15 @@
 <template>
   <li :id="todo.id">
-    <div @dblclick="showEditInput" v-show="!isEditing" class="list">
-      <div @click="toggleCheckBox" class="list__checkbox">
-        <div v-show="todo.completed" class="list__tick">&#10003;</div>
+    <div @dblclick="showEditInput" v-show="!isEditing">
+      <div class="list-container">
+        <div @click="toggleCheckBox" class="list__checkbox">
+          <div v-show="todo.completed" class="list__tick">&#10003;</div>
+        </div>
+        <p class="list__task" :class="{ taskDone: todo.completed}">{{todo.text}}</p>
+        <div class="note" @click="openNoteModal">+</div>
+        <div @click="deleteTask" class="list__deleteButton">&#9747;</div>
       </div>
-      <p class="list__task" :class="{ taskDone: todo.completed}">{{todo.text}}</p>
-      <div class="note" @click="openNoteModal">+</div>
-      <div @click="deleteTask" class="list__deleteButton">&#9747;</div>
+      <div class="list__createTime">created: {{todo.time}}</div>
     </div>
     <div v-show="isEditing" class="list">
       <input @keyup.enter="saveText" class="list__edit" v-model="editVal" type="text">
@@ -14,7 +17,7 @@
     <div v-show="openModal" class="overlay">
       <div class="modal">
         <div class="closeButton-container">
-          <div  class="empty-box"></div>
+          <div class="empty-box"></div>
           <div @click="closeModal" class="modal__closebutton">&#9747;</div>
         </div>
         <div v-show="!anyNoteContent || noteEditButtonClicked">
@@ -31,7 +34,6 @@
 </template>
 
 <script>
-import Vue from "vue";
 import eventBus from "../eventBus.js";
 
 export default {
@@ -112,7 +114,7 @@ export default {
 li {
   list-style-type: none;
   font-size: 2.4rem;
-  border: 0.4rem solid teal;
+  border: 0.4rem solid #03a9f4;
   padding: 1rem;
   margin-bottom: 1rem;
 }
@@ -121,6 +123,19 @@ li {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.list-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list__createTime {
+  font-size: 1.5rem;
+  font-family: "Roboto", sans-serif;
+  color: gray;
+  margin-left: 2rem;
 }
 
 .list__tick {
@@ -215,7 +230,7 @@ li {
   z-index: 100;
   overflow: auto;
   border-radius: 4px;
-  border: 3px solid rgb(0, 128, 128);
+  border: 3px solid #03a9f4;
 }
 
 .modal__textarea {

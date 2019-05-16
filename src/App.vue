@@ -3,11 +3,16 @@
     <Header @add-item="addItem"></Header>
     <main>
       <div v-show="ifTasksthere" class="filter">
-        <div class="filter__item">All</div>
-        <div class="filter__item">Active</div>
-        <div class="filter__item">Completed</div>
+        <FilterTab
+          @change-tab-and-filter="changeTabAndFilter"
+          v-for="(tab,index) in filters"
+          :tab="tab"
+          :key="index"
+          :id="index"
+          :selectedTab="selectedTab"
+        ></FilterTab>
       </div>
-      <TodoList :todos="todos"></TodoList>
+      <TodoList :filter="filters[selectedTab]" :todos="todos"></TodoList>
     </main>
   </div>
 </template>
@@ -16,35 +21,50 @@
 import eventBus from "./eventBus.js";
 import Header from "./components/Header";
 import TodoList from "./components/TodoList";
+import FilterTab from "./components/FilterTab";
 import shortid from "shortid";
 export default {
   name: "app",
   components: {
     Header,
-    TodoList
+    TodoList,
+    FilterTab
   },
   data() {
     return {
-      todos: []
+      todos: [],
+      filters: ["All", "Active", "Completed"],
+      selectedTab: 0
     };
   },
   methods: {
     addItem(text) {
+      let that = this;
       let todoObj = {
         text,
         completed: false,
         note: "",
-        id: shortid.generate()
+        id: shortid.generate(),
+        time: that.currentTime()
       };
       this.todos.unshift(todoObj);
     },
     updateTodos(todo) {
       this.todos = todo;
+    },
+    changeTabAndFilter(id) {
+      this.selectedTab = id;
+    },
+    currentTime() {
+      let time = Date().toLocaleString();
+      let firstWhitespaceIndex = time.indexOf(" ");
+      let gmtIndex = time.indexOf("GMT");
+      return time.slice(firstWhitespaceIndex + 1, gmtIndex - 1);
     }
   },
   computed: {
     ifTasksthere() {
-      return this.todos.length > 0
+      return this.todos.length > 0;
     }
   },
   mounted() {
@@ -110,16 +130,5 @@ main {
   justify-content: center;
   align-items: center;
   margin-bottom: 1.2rem;
-}
-
-.filter__item {
-  font-size: 2.4rem;
-  padding: 1rem;
-  margin-right: 1rem;
-  border: 2px solid teal;
-  cursor: pointer;
-  font-family: "Roboto", sans-serif;
-  user-select: none;
-  -webkit-touch-callout: none;
 }
 </style>

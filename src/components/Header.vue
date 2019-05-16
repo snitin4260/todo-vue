@@ -34,7 +34,7 @@ export default {
 .todo-input {
   flex: 1 1 100%;
   max-width: 50rem;
-  border: 0.4rem solid teal;
+  border: 0.4rem solid #03a9f4;
   padding: 1rem;
   font-size: 2.4rem;
   font-family: "Roboto", sans-serif;
@@ -56,10 +56,9 @@ export default {
   font-size: 8rem;
   flex: 1 1 100%;
   text-align: center;
-  color: teal;
+  color: #03a9f4;
   margin-bottom: 1.4rem;
 }
-
 </style>
 
 
